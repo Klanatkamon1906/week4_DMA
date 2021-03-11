@@ -96,18 +96,21 @@ int main(void)
   MX_USART2_UART_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_ADC_Start_DMA(&hadc1, ADCData, 4);
+  HAL_ADC_Start_DMA(&hadc1, ADCData, 4);	//ADCData = &ADCData[0]
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  /*--------------------------------------------------------------------------------------------------------------*/
   while (1)
   {
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 
   }
+  /*--------------------------------------------------------------------------------------------------------------*/
   /* USER CODE END 3 */
 }
 
@@ -298,8 +301,8 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LD2_Pin */
@@ -309,17 +312,31 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
 }
 
 /* USER CODE BEGIN 4 */
+/*--------------------------------------------------------------------------------------------------------------*/
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	if(GPIO_Pin == GPIO_PIN_13)
 	{
+		if(HAL_GPIO_ReadPin(LD2_GPIO_Port, LD2_Pin) == 1)
+		{
+			HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+		}
 		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 
 	}
+	if(HAL_GPIO_ReadPin(LD2_GPIO_Port, LD2_Pin) == 1)
+	{
+
+	}
 }
+/*--------------------------------------------------------------------------------------------------------------*/
 /* USER CODE END 4 */
 
 /**
