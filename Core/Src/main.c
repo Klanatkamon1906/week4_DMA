@@ -111,11 +111,14 @@ int main(void) {
 
 		if (ButtonState == 0) {
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
-			TestButton = 1;
-		}
 
-		else {
-			TestButton = 2;
+		} else if (ButtonState == 1) {
+			if ((HAL_GetTick() - ButtontimeStamp) >= Random) {
+				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+				ButtontimeStamp = HAL_GetTick();
+			}
+		} else {
+			ButtonState = 0;
 		}
 
 		/* USER CODE END WHILE */
@@ -205,7 +208,7 @@ static void MX_ADC1_Init(void) {
 	 */
 	sConfig.Channel = ADC_CHANNEL_0;
 	sConfig.Rank = 1;
-	sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+	sConfig.SamplingTime = ADC_SAMPLETIME_84CYCLES;
 	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
 		Error_Handler();
 	}
@@ -326,22 +329,16 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			ButtonState = 1;
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 			Random = 1000 + (((22695477 * ADCData[0]) + ADCData[1]) % 10000);
-			TestButton = 3;
-//			ButtontimeStamp = HAL_GetTick();
-			if ((HAL_GetTick() - ButtontimeStamp) >= Random) {
-				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
-				ButtontimeStamp = HAL_GetTick();
-			}
-
-		} else {
-			ResponTime = HAL_GetTick() - ButtontimeStamp;
-			ButtonState = 0;
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
-			TestButton = 4;
+//			TestButton = 3;
+			ButtontimeStamp = HAL_GetTick();
 		}
-	}
 
+	} else {
+		ResponTime = HAL_GetTick() - ButtontimeStamp;
+		ButtonState = 0;
+	}
 }
+
 /*--------------------------------------------------------------------------------------------------------------*/
 /* USER CODE END 4 */
 
